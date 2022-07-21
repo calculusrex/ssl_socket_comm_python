@@ -6,7 +6,7 @@ import os
 import functools as ft
 import numpy as np
 
-from common import receive_json, send_json, generate_ssl_creds, new_sock, no_ssl_creds
+from common import receive_json, send_json, generate_ssl_creds, new_sock, no_ssl_creds, local_ip
 
 def request(address, data):
     generate_ssl_creds('client')
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     
     # test_address = ('localhost', PORT)
     test_address = (
-        socket.gethostname(),
+        local_ip(),
         PORT,
     )
     

@@ -5,8 +5,9 @@ from constants import *
 import os
 import functools as ft
 from OpenSSL import crypto, SSL
+from pprint import pprint
 
-from common import receive_json, send_json, generate_ssl_creds
+from common import receive_json, send_json, generate_ssl_creds, local_ip
 
 class EchoJsonTCPHandler(socketserver.BaseRequestHandler):
     """
@@ -22,7 +23,7 @@ class EchoJsonTCPHandler(socketserver.BaseRequestHandler):
         self.data = receive_json(self.request)
 
         print("{} wrote:".format(self.client_address[0]))
-        print(self.data)
+        pprint(self.data)
 
         send_json(
             self.request, self.data)
@@ -68,10 +69,12 @@ if __name__ == '__main__':
 
     test_server_data = {
         'handler': EchoJsonTCPHandler,
-        'address': (socket.gethostname(),
-                    PORT),
+        # 'address': (socket.gethostname(),
+        #             PORT),
         # 'address': ('192.168.100.176',
         #             PORT),
+        'address': (local_ip(),
+                    PORT),
     }
     
     generate_ssl_creds('server')

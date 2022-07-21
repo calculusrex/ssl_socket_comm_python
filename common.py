@@ -5,6 +5,7 @@ from json_upgrade import json_dumps, json_loads
 import functools as ft
 import socket, ssl
 from OpenSSL import crypto, SSL
+import netifaces
 
 
 def generate_ssl_creds__(
@@ -131,3 +132,22 @@ def send_json(conn, data):
         json_string,
         'utf8')
     conn.sendall(data_bytes)
+
+def local_ip():
+    addresses = []
+    for iface in netifaces.interfaces():
+        addressess = list(
+            netifaces.ifaddresses(
+                iface).values())
+        data = []
+        for addresses_ in addressess:
+            data.extend(
+                addresses_)
+        addresses.extend(data)
+    ips = map(
+        lambda address_data: address_data['addr'],
+        addresses)
+    return list(filter(
+        lambda cs: '192.168.100' in cs,
+        ips))[0]
+        
