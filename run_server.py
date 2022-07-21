@@ -70,13 +70,11 @@ if __name__ == '__main__':
         'handler': EchoJsonTCPHandler,
         'address': (socket.gethostname(),
                     PORT),
+        # 'address': ('192.168.100.176',
+        #             PORT),
     }
     
     generate_ssl_creds('server')
-
-    # successfully pulled #
-
-    # successfully pushed #
 
     provide_server(
         test_server_data)
