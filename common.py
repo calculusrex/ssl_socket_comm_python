@@ -71,7 +71,7 @@ def new_sock(creds_prefix):
     sock = socket.socket(
         socket.AF_INET, socket.SOCK_STREAM)
 
-    context = ssl.SSLContext()
+    context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
     context.load_cert_chain(
         f'{creds_prefix}_cert.pem',
         keyfile=f'{creds_prefix}_privatekey.pem')

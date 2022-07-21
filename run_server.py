@@ -46,7 +46,8 @@ def provide_server(server_data):
     with socketserver.TCPServer(
         server_data['address'],
         server_data['handler']) as server:
-        context = ssl.SSLContext()
+        context = ssl.SSLContext(
+            ssl.PROTOCOL_SSLv23)
         context.load_cert_chain(
             'server_cert.pem', keyfile='server_privatekey.pem')
         server.socket = context.wrap_socket(
