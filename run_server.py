@@ -76,5 +76,7 @@ if __name__ == '__main__':
 
     # successfully pulled #
 
+    # successfully pushed #
+
     provide_server(
         test_server_data)
