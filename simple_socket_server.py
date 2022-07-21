@@ -1,12 +1,11 @@
 # import sys
-import socket, ssl, selectors
+import socket, ssl, selectors, types
 from pprint import pprint
 
 from constants import PORT
 from common import generate_ssl_creds, new_sock, receive_json, send_json, local_ip
 
-
-
+sel = selectors.DefaultSelector()
 
 def run_sg_conn_server():
     address = (local_ip(), PORT)
@@ -21,6 +20,44 @@ def run_sg_conn_server():
             pprint(data)
             send_json(conn, data)
             conn.close()
+
+def accept_wrapper(sock):
+    conn, addr = sock.accept()
+    print(f'Accepted connection from {addr}')
+    conn.setblocking(False)
+    data = types.SimpleNamespace(
+        addr=addr, inb=b'', outb=b'')
+    events = selectors.EVENT_READ | selectors.EVENT_WRITE
+    sel.register(
+        conn, events, data=data)
+
+def run_multi_conn_server():
+    address = (local_ip(), PORT)
+    generate_ssl_creds('simple_socket_server')
+
+    lsock = new_sock('simple_socket_server')
+    lsock.bind(address)
+    lsock.listen()
+    print(f'Listening on {address}\n')
+    lsock.setblocking(False)
+    sel.register(
+        lsock, selectors.EVENT_READ, data=None)
+
+    try:
+        while True:
+            events = sel.select(
+                timeout=None)
+            for key, mask in events:
+                if key.data is None:
+                    accept_wrapper(key.fileobj)
+                else:
+                    service_connection(key, mask)
+
+    except KeyboardInterrupt:
+        print('Caught keyboard interrupt, exiting')
+    finally:
+        sel.close()
+        lsock.close()
 
 
 if __name__ == '__main__':
