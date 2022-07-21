@@ -1,15 +1,19 @@
 import socket, ssl
 
 from constants import PORT
-from common import generate_ssl_creds, new_sock, receive_json, send_json
+from common import generate_ssl_creds, new_sock, receive_json, send_json, local_ip
 
 
 if __name__ == '__main__':
     print('simple_socket_server.py')
 
     # address = ('192.168.100.176', PORT)
+    # address = (
+    #     socket.gethostname(),
+    #     PORT
+    # )
     address = (
-        socket.gethostname(),
+        local_ip(),
         PORT
     )
 
