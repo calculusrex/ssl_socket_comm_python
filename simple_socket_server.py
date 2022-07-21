@@ -1,4 +1,5 @@
 import socket, ssl
+from pprint import pprint
 
 from constants import PORT
 from common import generate_ssl_creds, new_sock, receive_json, send_json, local_ip
@@ -49,5 +50,5 @@ if __name__ == '__main__':
         with conn:
             print(f"Connected by {addr}")
             data = receive_json(conn)
-            print(data)
+            pprint(data)
             send_json(conn, data)
