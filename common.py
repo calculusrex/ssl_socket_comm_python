@@ -33,7 +33,6 @@ def count_braces(brace_count, json_fragment):
     # print('current brace count:', curr_count)
     return curr_count
 
-
 def receive_json(sock, chunk_size=1024):
     chunks = []
     chunks.append(
