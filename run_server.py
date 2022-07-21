@@ -6,7 +6,7 @@ import os
 import functools as ft
 from OpenSSL import crypto, SSL
 
-from common import count_braces, receive_json, send_json
+from common import receive_json, send_json, generate_ssl_creds
 
 class EchoJsonTCPHandler(socketserver.BaseRequestHandler):
     """
@@ -15,12 +15,12 @@ class EchoJsonTCPHandler(socketserver.BaseRequestHandler):
     It is instantiated once per connection to the server, and must
     override the handle() method to implement communication to the
     client.
-    """
-    
+    """    
     def handle(self):
         # self.request is the TCP socket connected to the client
 
         self.data = receive_json(self.request)
+
         print("{} wrote:".format(self.client_address[0]))
         print(self.data)
 
@@ -41,60 +41,6 @@ class EchoJsonTCPHandler(socketserver.BaseRequestHandler):
 #             bytes(serialized_json + '\n',
 #                   'utf8'))
 
-def no_server_ssl_creds():
-    KEY_FILE = "server_privatekey.pem"
-    CERT_FILE = "server_cert.pem"
-    fnames = os.listdir()
-    return not(
-        ft.reduce(lambda a, b: a and b,
-                  map(lambda x: x in fnames,
-                      [KEY_FILE, CERT_FILE]),
-                  True))
-        
-
-def generate_server_ssl_creds(
-        emailAddress="emailAddress",
-        commonName="commonName",
-        countryName="NT",
-        localityName="localityName",
-        stateOrProvinceName="stateOrProvinceName",
-        organizationName="organizationName",
-        organizationUnitName="organizationUnitName",
-        serialNumber=0,
-        validityStartInSeconds=0,
-        validityEndInSeconds=10*365*24*60*60,
-        KEY_FILE = "server_privatekey.pem",
-        # CERT_FILE="selfsigned.crt",
-        CERT_FILE="server_cert.pem",):
-    #can look at generated file using openssl:
-    #openssl x509 -inform pem -in selfsigned.crt -noout -text
-    # create a key pair
-    k = crypto.PKey()
-    k.generate_key(crypto.TYPE_RSA, 4096)
-    # create a self-signed cert
-    cert = crypto.X509()
-    cert.get_subject().C = countryName
-    cert.get_subject().ST = stateOrProvinceName
-    cert.get_subject().L = localityName
-    cert.get_subject().O = organizationName
-    cert.get_subject().OU = organizationUnitName
-    cert.get_subject().CN = commonName
-    cert.get_subject().emailAddress = emailAddress
-    cert.set_serial_number(serialNumber)
-    cert.gmtime_adj_notBefore(0)
-    cert.gmtime_adj_notAfter(validityEndInSeconds)
-    cert.set_issuer(cert.get_subject())
-    cert.set_pubkey(k)
-    cert.sign(k, 'sha512')
-    with open(CERT_FILE, "wt") as f:
-        f.write(
-            crypto.dump_certificate(
-                crypto.FILETYPE_PEM, cert).decode("utf-8"))
-    with open(KEY_FILE, "wt") as f:
-        f.write(
-            crypto.dump_privatekey(
-                crypto.FILETYPE_PEM, k).decode("utf-8"))
-
 def provide_server(server_data):
     print(f'SEVER PROVIDED ON: {server_data}', '\n')
     with socketserver.TCPServer(
@@ -114,13 +60,18 @@ def provide_server(server_data):
 if __name__ == '__main__':
     print('run_server.py', '\n')
 
+    # test_server_data = {
+    #     'handler': EchoJsonTCPHandler,
+    #     'address': ('localhost', PORT),
+    # }
+
     test_server_data = {
         'handler': EchoJsonTCPHandler,
-        'address': ('localhost', PORT),
+        'address': (socket.gethostname(),
+                    PORT),
     }
     
-    if no_server_ssl_creds():
-        generate_server_ssl_creds()
+    generate_ssl_creds('server')
 
     provide_server(
         test_server_data)
