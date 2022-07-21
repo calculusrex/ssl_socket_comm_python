@@ -1,8 +1,26 @@
-import socket, ssl
+# import sys
+import socket, ssl, selectors
 from pprint import pprint
 
 from constants import PORT
 from common import generate_ssl_creds, new_sock, receive_json, send_json, local_ip
+
+
+
+
+def run_sg_conn_server():
+    address = (local_ip(), PORT)
+    generate_ssl_creds('simple_socket_server')
+    with new_sock('simple_socket_server') as s:
+        s.bind(address)
+        s.listen()
+        conn, addr = s.accept()
+        with conn:
+            print(f"Connected by {addr}")
+            data = receive_json(conn)
+            pprint(data)
+            send_json(conn, data)
+            conn.close()
 
 
 if __name__ == '__main__':
@@ -13,13 +31,9 @@ if __name__ == '__main__':
     #     socket.gethostname(),
     #     PORT
     # )
-    address = (
-        local_ip(),
-        PORT
-    )
-
-    generate_ssl_creds('simple_socket_server')
     
+    # generate_ssl_creds('simple_socket_server')
+
     # serversocket = socket.socket(
     #     socket.AF_INET, socket.SOCK_STREAM)
     # serversocket.bind(address)
@@ -43,12 +57,17 @@ if __name__ == '__main__':
     #                 break
     #             conn.sendall(data)
 
-    with new_sock('simple_socket_server') as s:
-        s.bind(address)
-        s.listen()
-        conn, addr = s.accept()
-        with conn:
-            print(f"Connected by {addr}")
-            data = receive_json(conn)
-            pprint(data)
-            send_json(conn, data)
+    # If you’re getting requests from clients that initiate CPU bound work, look at the concurrent.futures module. It contains the class ProcessPoolExecutor, which uses a pool of processes to execute calls asynchronously.
+
+    # with new_sock('simple_socket_server') as s:
+    #     s.bind(address)
+    #     s.listen()
+    #     conn, addr = s.accept()
+    #     with conn:
+    #         print(f"Connected by {addr}")
+    #         data = receive_json(conn)
+    #         pprint(data)
+    #         send_json(conn, data)
+    #         conn.close()
+
+    run_sg_conn_server()
